@@ -8,11 +8,26 @@ function addUser(user) {
     const { error, value } = newUser.validateUserSchema().validate(user);
     if (error) reject(error);
     else {
-      await newUser.hashPassword();
-      newUser
-        .save()
-        .then((user) => resolve(user))
-        .catch((err) => reject(err));
+      const regex = new RegExp(
+        "^(?=.*?[A-Z])(?=.*?[a-z])(?=(.*?[0-9]){4})(?=.*?[#?!@$%^&*-]).{9,9}$"
+      );
+      let statusRegex = regex.test(newUser.password);
+      if (statusRegex) {
+        await newUser.hashPassword();
+        newUser
+          .save()
+          .then((user) => resolve(user))
+          .catch((err) => reject(err));
+      } else {
+        reject({
+          details: [
+            {
+              message:
+                "password must includes small and camel letters,4digits,lenght:9,and one !@#$%^&*",
+            },
+          ],
+        });
+      }
     }
   });
 }
@@ -26,8 +41,8 @@ function getAllUsers() {
 }
 
 function setUserIsAdmin(_id) {
-  return new Promise(async(resolve, reject) => {
-    const user =await User.findById(_id);
+  return new Promise(async (resolve, reject) => {
+    const user = await User.findById(_id);
     user.isAdmin = true;
     user
       .save()
@@ -54,5 +69,6 @@ module.exports = {
   getAllUsers,
   getUserById,
   addUser,
-  generateToken,setUserIsAdmin,
+  generateToken,
+  setUserIsAdmin,
 };

@@ -1,8 +1,6 @@
 const visitCard = require("../models/visitCard");
 const User = require("../models/user");
-const { findById } = require("../models/user");
-const res = require("express/lib/response");
-const Joi = require("joi");
+
 const mongoose = require("mongoose");
 
 function getAllVisitCard() {
@@ -53,17 +51,26 @@ function updateCardId(cardId, newId, userId) {
       let oldCard = await visitCard.findById(cardId);
       const id = newId[0]._id;
       let objid = mongoose.Types.ObjectId(id);
-
+      const {
+        likes,
+        businessName,
+        businessDiscribe,
+        businessAdress,
+        businessPhone,
+        businessPicture,
+        createdAt,
+        updatedAt,
+      } = oldCard;
       let newVisitCard = {
         _id: objid,
-        likes: oldCard.likes,
-        businessName: oldCard.businessName,
-        businessDiscribe: oldCard.businessDiscribe,
-        businessAdress: oldCard.businessAdress,
-        businessPhone: oldCard.businessPhone,
-        businessPicture: oldCard.businessPicture,
-        createdAt: oldCard.createdAt,
-        updatedAt: oldCard.updatedAt,
+        likes,
+        businessName,
+        businessDiscribe,
+        businessAdress,
+        businessPhone,
+        businessPicture,
+        createdAt,
+        updatedAt,
       };
       deleteCard(cardId, oldCard.user_id)
         .then()
@@ -119,15 +126,17 @@ function updateCardLikes(cardId, likes) {
   return new Promise(async (resolve, reject) => {
     try {
       const card = await visitCard.findById(cardId);
-      if (await checkIsID(likes)) {
-        card.likes = likes;
-        card
-          .save()
-          .then((card) => resolve(card))
-          .catch((err) => reject(err));
-      } else {
-        reject("error:you must send data");
-      }
+      const result = await checkIsID(likes);
+      if (result || !result) {
+        if (result) {
+          card.likes = likes;
+          card
+            .save()
+            .then((card) => resolve(card))
+            .catch((err) => reject(err));
+        } else
+          reject("error:there is card with no user,check your inputs please");
+      } else reject("errorId:id must be 24 letters");
     } catch (err) {
       reject("card id is not a valid id");
     }
@@ -137,14 +146,12 @@ async function checkIsID(likes) {
   try {
     for (const like of likes) {
       let user = await User.findById(like._id);
-      if (user === null) {
-        return false;
-      }
+      if (user === null) return false;
     }
 
     return true;
   } catch (err) {
-    console.log("function error", err);
+    return err;
   }
 }
 function deleteCard(cardId, userId) {
@@ -156,9 +163,7 @@ function deleteCard(cardId, userId) {
         .findOneAndDelete({ _id: cardId })
         .then((card) => resolve(card))
         .catch((err) => reject(err));
-    } else {
-      reject({ status: "failed", message: "u need to be a vip" });
-    }
+    } else reject({ status: "failed", message: "u need to be a vip" });
   });
 }
 async function deleteCardFromUser(_id) {

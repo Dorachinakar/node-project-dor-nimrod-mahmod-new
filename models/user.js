@@ -23,11 +23,11 @@ const userSchema = new mongoose.Schema(
     },
     cards: {
       type: [Object],
-    },isAdmin:{
-      type:Boolean ,
+    },
+    isAdmin: {
+      type: Boolean,
       default: false,
-
-    }
+    },
   },
   { timestamps: true }
 );

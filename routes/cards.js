@@ -22,25 +22,26 @@ router.get("/", (req, res) => {
     .then((visitCard) => res.status(200).json(visitCard))
     .catch((err) => res.status(404).json(err));
 });
-
+//8. get visit card data by id
 router.get("/cardsbyid/:id", (req, res) => {
   let id = req.params.id;
   getById(id)
     .then((visitCard) => res.status(200).json(visitCard))
-    .catch((err) => res.status(404).json(err));
+    .catch((err) => res.status(400).json(err));
 });
-
+//10. add card only for vip users
 router.post("/addCard", auth, (req, res) => {
   addCard(req.body, req.user_id)
     .then((visitCard) => res.status(200).json(visitCard))
     .catch((err) => res.status(500).json(err));
 });
+//9. get all cards from user
 router.get("/getCardsFromUser", auth, (req, res) => {
   getCardsFromUser(req.user_id)
     .then((cards) => res.status(200).json(cards))
     .catch((err) => res.status(500).json(err));
 });
-
+// 11.edit card by id
 router.put("/editCardById/cardId/:id", auth, (req, res) => {
   const filter = {
     cardId: req.params.id,
@@ -57,7 +58,7 @@ router.put("/editCardById/cardId/:id", auth, (req, res) => {
       res.status(400).json(err);
     });
 });
-
+// 12.delete card by id for admins or vips users
 router.delete("/cardDelete/cardId/:id", auth, (req, res) => {
   const cardId = req.params.id;
   const userId = req.user_id;
@@ -68,7 +69,7 @@ router.delete("/cardDelete/cardId/:id", auth, (req, res) => {
       res.status(400).json(err);
     });
 });
-
+// 13.change users likes for card by id
 router.patch("/cardsLikes/cardId/:id", auth, (req, res) => {
   const cardId = req.params.id;
   const userId = req.user_id;
